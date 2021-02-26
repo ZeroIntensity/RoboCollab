@@ -8,7 +8,9 @@ import json # Used for JSON
 import asyncio # Import asyncio ~ Needed for autostatus
 from pytube import YouTube # For handling youtube links. would use bs4 but this is easier lmao
 import jsondb # Thing I made for better handling json
-import traceback
+import traceback # For error handling
+import string # For getting alphabet
+from platform import python_version # For python version
 
 class colors: # Colors for embeds
   success = 0x80ffa4 # Default
@@ -50,14 +52,15 @@ async def customembed(ctx, title=None, msg=None, col=colors.success): # Embed th
 
 startingprefix = '//' # Default prefix for when the bot joins a guild
 
-client = commands.Bot(command_prefix = get_prefix) # Initializes the bot client
-
-gmd = gd.Client() # Initializes the gd client
-client.gmd = gmd # Attatch bot to gd client
-
 intents = discord.Intents.default() # Gets intents
 intents.members = True # Turns on members intent
 intents.guilds = True # Turns on guilds intent
+
+client = commands.Bot(command_prefix = get_prefix, intents = intents) # Initializes the bot client
+
+gmd = gd.Client() # Initializes the gd client
+client.gmd = gmd # Attatch bot to gd client
+version = '1.0.0'
 
 client.remove_command('help') # Removes the premade help command
 
@@ -129,7 +132,9 @@ async def on_message(message: gd.message.Message):
 '''
     
 
-
+@client.command()
+async def info(ctx):
+  await normalembed(ctx, 'RoboCollab Info', f'**Language:** `Python {python_version()}`\n**RoboCollab Version:** `V7 {version}`\n**Servers:** `{len(client.guilds)}`\n**Users:** `{len(client.users)}`\n\n**Created by [ZeroIntensity](https://zintensity.net)**\n**RoboCollab\'s [GitHub](https://github.com/ZeroIntensity/RoboCollab)**')
 
 @client.command() # Define a bot command
 async def link(ctx, *, args = None): # Account linking command
@@ -153,7 +158,6 @@ async def link(ctx, *, args = None): # Account linking command
     json.dump(users, f) # Dump the json data
   
   await normalembed(ctx, 'Account Link',f'Waiting to link `{args}`. Please message **"verify"** to the account **RoboCollab** on GD.')
-  
 
 
 @client.command(aliases=['prefix']) # Define a bot command
@@ -184,9 +188,11 @@ async def help(ctx, args = None):
         return
     embed = await customembed(ctx, 'Help', 'Please select a category') # Sent if no/invalid argument is specified
     embed.add_field(name="Main Commands", value=f"``{prefix}help main``")
+    embed.add_field(name="GD Commands", value=f"``{prefix}help gd``")
+    embed.add_field(name="Collab Commands", value=f"``{prefix}help collab``")
     await ctx.send(embed=embed)
 
-@client.command()
+@client.command(aliases=['create','cc','create_collab'])
 @commands.has_permissions(administrator=True)
 async def createcollab(ctx, name = None, song = None, difficulty = None):
   database = jsondb.Client('database/')
@@ -204,35 +210,43 @@ async def createcollab(ctx, name = None, song = None, difficulty = None):
   if not difficulty in valid_difficulties:
     await error(ctx, 'That is not a valid difficulty.')
     return
-
+  if len(name) > 20:
+    await error(ctx, 'You cannot create a collab name with more than 20 characters.')
+    return
+  for i in name:
+    if i not in string.ascii_letters:
+      try:
+        int(i)
+      except:
+        await error(ctx, 'That is not a valid name.')
+        return
+  difficulty = difficulty.capitalize()
   try: # Try statement to handle exception if the song is invalid
     yt = YouTube(song) # Get the song
-    song = yt.title
+    songtitle = yt.title
   except: # Catch the exception
     await error(ctx, f'That is not a valid YouTube URL.')
-  difficulty = difficulty.split(' ')
-  for i in difficulty:
-    i = i[0].upper() + i[1:] # Switch the first letter to capital in each word
-  cache = difficulty
-  difficulty = ''
-  for i in cache:
-    difficulty += i
   try:
     database.create(f'{ctx.guild.id}{name}') # Check if a collab exists with that name
-  except:
+  except Exception as err:
     await error(ctx, 'This server already has a collab with that name.')
+    print(traceback.format_exc())
   database.connect(f'{ctx.guild.id}{name}') # Connect to the json
 
   x = { # Dict that will be added to the json
     'host_discord_id': ctx.author.id,
     'name': name,
-    'song': song,
+    'song': {
+      'link': song,
+      'title': songtitle
+    },
     'difficulty': difficulty
   }
+  database.dump(f'user_{ctx.author.id}', ctx.author.id)
   database.dump('main_data', x) # Dump the json data
   database.connect_clear() # Clear the connection
 
-  await normalembed(ctx, 'Collab Created!', f'The collab `{name}` has been created.\n**Host:** {ctx.author.mention}\n**Song:** `{song}`\n**Difficulty:** `{difficulty}`') # Send the embed
+  await normalembed(ctx, 'Collab Created!', f'The collab `{name}` has been created.\n**Host:** {ctx.author.mention}\n**Song:** `{songtitle}`\n**Difficulty:** `{difficulty}`') # Send the embed
 
 @client.command()
 @commands.has_permissions(administrator=True)
@@ -269,7 +283,7 @@ async def invite(ctx, member: discord.Member = None, args = None): # Handles col
   database.connect_clear() # Clear the connection
   await normalembed(ctx, 'Member Invited!', f'{member.mention} has been invited to the collab `{args}`! They can use `{pre}join "{args}"` to join it!') # Send the embed
 
-@client.command()
+@client.command(aliases=['accept'])
 async def join(ctx, args = None): # Handles collab joins
   if not args: # If a collab isnt specified
     await error(ctx, 'Please specify a collab.')
@@ -300,10 +314,71 @@ async def delete(ctx, args = None): # Handles collab deletions
   database = jsondb.Client('database/') # Load the jsondb client
   if not args: # If a collab isn't specified
     await error(ctx, 'Please specify a collab to remove.')
+    return
   try:
     database.remove(f'{ctx.guild.id}{args}') # Try and remove the json file
   except:
     await error(ctx, 'That collab doesn\'t exist.') # If it fails
+    return
   await normalembed(ctx, 'Collab Removed!', f'The collab `{args}` has been removed.') # Send the embeds
 
+@client.command(aliases=['add_part'])
+@commands.has_permissions(administrator=True)
+async def addpart(ctx, member: discord.Member = None, args = None, start = None, end = None, deadline = None):
+  database = jsondb.Client('database/') # Load the jsondb client
+  if not args: # If a collab isn't specified
+    await error(ctx, 'Please specify a collab.')
+    return
+  if not member: # If a member isn't specified
+    await error(ctx, 'Please specify a member.')
+    return
+  if not deadline: # If a deadline isn't specified
+    await error(ctx, 'Please specify a deadline.')
+    return
+  if not start: # If a start offset isn't specified
+    await error(ctx, 'Please specify a start offset.')
+    return
+  if not end: # If a end offset isn't specified
+    await error(ctx, 'Please specify a end offset.')
+    return
+  try: # Check for a valid deadline
+    day,month,year = deadline.split('/') # Split it at a /
+    int(day) # Check if they are ints
+    int(month)
+    int(year)
+  except: # Catch the exception
+    await error(ctx, 'That is not a valid deadline')
+    return
+  deadline = day.join('/') + month.join('/') + year.join('/') # Rebuild the deadline variable
+  try: # Check for valid offsets
+    int(start)
+    int(end)
+    if start > end:
+      0/0 # Cause an error
+  except: # Catch the exception
+    await error(ctx, 'That is not a valid start/end offset.')
+    return
+
+  try:
+    database.connect(f'{ctx.guild.id}{args}') # Try and connect to the db
+  except:
+    await error(ctx, 'That collab doesn\'t exist.') # If it doesn't exist
+    return
+  try:
+    database.load(f'user_{member.id}') # Load the member json
+    return
+  except: # yeah
+    await error(ctx, 'That user is not in this collab.')
+  
+  x = { # Json that will be put in the database
+    'id': member.id, # Member id
+    'start': start, # Start offset
+    'end': end, # End offset
+    'deadline': deadline # Deadline
+  }
+  database.dump(f'part_{member.id}', x) # Dump the json
+  database.connect_clear() # Clear the connection
+  embed = await customembed(ctx, 'Part Added!', f'Added a part for {member.mention} from `{start} - {end}`\n**Deadline:** `{deadline}`') # Get the embed
+  await ctx.send(member.mention + ", a part was added for you!", embed=embed) # Send the message
+  
 client.run(os.getenv('token')) # Run the bot using token from .env file

@@ -1,14 +1,25 @@
 import os
 import json
 
+
 class Client:
   def __init__(self, path=''):
     self._path = path
     self._conn = None
 
+  def get_conn(self, file):
+    if not file:
+      if not self._conn:
+        raise FileNotFoundError("File not found")
+      else:
+        conn = self._path + self._conn
+    else:
+      conn = self._path + file + '.json'
+    return conn
 
   def create(self, file=None):
-    conn = get_conn(file)
+    conn = self.get_conn(file)
+    
     if os.path.exists(conn):
       raise FileExistsError("File already exists")
     f = open(conn, 'w+')
@@ -17,15 +28,16 @@ class Client:
     return True
   
   def remove(self, file=None):
-    conn = get_conn(file)
+    conn = self.get_conn(file)
+    
     if not os.path.exists(conn):
       raise FileNotFoundError("File not found")
     os.remove(conn)
     return True
   
   def dump(self, key, value, file=None):
-    conn = get_conn(file)
-
+    conn = self.get_conn(file)
+    
     with open(conn, 'r') as f:
       load = json.load(f)
 
@@ -44,25 +56,18 @@ class Client:
     self._conn = None
 
   def load(self, key, file=None):
-    conn = get_conn(file)
+    conn = self.get_conn(file)
+    
     
     with open(conn, 'r') as f:
       load = json.load(f)
     
     return load[key]
   
-  def get_conn(self, file):
-    if not file:
-      if not self._conn:
-        raise FileNotFoundError("File not found")
-      else:
-        conn = self._path + self._conn
-    else:
-      conn = self._path + file + '.json'
-    return conn
 
   def delete(self, key, file = None):
-    conn = get_conn(file)
+    conn = self.get_conn(file)
+    
 
     with open(conn, 'r') as f:
       load = json.load(f)
