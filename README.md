@@ -3,9 +3,9 @@
 
 ## Credits
 
-### Developer
+### Developers
 
-This project was developed by me, [ZeroIntensity](https://zintensity.net).
+This project was developed by [ZeroIntensity](https://zintensity.net) and [Brittank88](https://twitter.com/_brittank88).
 
 Special thanks to [nekitdev](https://github.com/nekitdev) for helping me with [gd.py](https://pypi.org/project/gd.py/).
 

@@ -380,5 +380,20 @@ async def addpart(ctx, member: discord.Member = None, args = None, start = None,
   database.connect_clear() # Clear the connection
   embed = await customembed(ctx, 'Part Added!', f'Added a part for {member.mention} from `{start} - {end}`\n**Deadline:** `{deadline}`') # Get the embed
   await ctx.send(member.mention + ", a part was added for you!", embed=embed) # Send the message
-  
+
+@client.command()
+async def eval(ctx, *, args):
+  if not str(ctx.author.id) == '736038441384542268':
+    await error(ctx, 'You cannot run this command.')
+    return
+  run = args.split('```')
+
+  try:
+    async def _eval(ctx):
+      exec(run[1])
+    
+    asyncio.run(_eval(ctx))
+  except Exception as err:
+    await error(ctx, f'```py\n{traceback.format_exc()}```')
+
 client.run(os.getenv('token')) # Run the bot using token from .env file
