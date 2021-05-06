@@ -18,6 +18,4 @@ Special thanks to [nekitdev](https://github.com/nekitdev) for helping me with [g
 
 ## Notes
 ### Known Bugs
-This project overall is pretty buggy and untested atm, so don't expect this to cover much.
-- Account linking is currently broken (hence why the core part of it is commented out)
-- The `error` function requires a `return` statement or else the command continues. I'm sure i've forgot to put this in some places, so some comands might be broken because of that.
+This is pretty untested so it will be pretty buggy.

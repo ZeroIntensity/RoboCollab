@@ -1,3 +1,6 @@
+# Main file.
+
+# All of these are here to make managing dependencies easier
 import discord # Import discord.py
 from discord.ext import commands # To initialize the bot client
 from discord.ext import tasks # For autostatus
@@ -11,44 +14,11 @@ import jsondb # Thing I made for better handling json
 import traceback # For error handling
 import string # For getting alphabet
 from platform import python_version # For python version
+from utils import *
+from commands import *
+from private import env
 
-class colors: # Colors for embeds
-  success = 0x80ffa4 # Default
-
-dotenv.load_dotenv() # Load the .env file
-
-
-async def get_prefix(client, message): # This one is for the command_prefix
-  with open("prefixes.json", "r") as f:
-    prefixes = json.load(f)
-    return prefixes[str(message.guild.id)]
-
-async def grab_prefix(ctx): # This one is used just to grab the guilds prefix in commands
-  with open("prefixes.json", "r") as f:
-    prefixes = json.load(f) # Load the json
-    return prefixes[str(ctx.guild.id)] # Return the prefix
-
-async def normalembed(ctx, title=None, msg=None, col=colors.success): # Normal premade embed
-  embed=discord.Embed(color=col)
-  embed.timestamp=(ctx.message.created_at)
-  if not title == None: # If the title argument isn't specified
-    embed.title=title
-  if not msg == None: # If the msg argument isn't specified
-    embed.description=msg
-  embed.set_footer(text='RoboCollab')
-  embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
-  await ctx.send(embed=embed)
-
-async def customembed(ctx, title=None, msg=None, col=colors.success): # Embed that I can add fields to
-  embed=discord.Embed(color=col)
-  embed.timestamp=(ctx.message.created_at)
-  if not title == None: # If the title argument isn't specified
-    embed.title=title
-  if not msg == None: # If the msg argument isn't specified
-    embed.description=msg
-  embed.set_footer(text='RoboCollab')
-  embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
-  return embed # Returns the embed instead of sending it
+ENV = env.env()
 
 startingprefix = '//' # Default prefix for when the bot joins a guild
 
@@ -63,51 +33,20 @@ client.gmd = gmd # Attatch bot to gd client
 version = '1.0.0'
 
 client.remove_command('help') # Removes the premade help command
-
-async def error(ctx, msg): # Premade embed for invalid arguments
-  embed=discord.Embed(color=0xff0000)
-  embed.timestamp=(ctx.message.created_at)
-  embed.title='Error'
-  embed.description=msg # Set the description to the msg argument
-  embed.set_footer(text='RoboCollab')
-  embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
-  await ctx.send(embed=embed) # Send the embed
-  return
-
-@client.event # Listen for a bot event
-async def on_guild_join(guild): # Do when the bot joins a guild
-  with open("prefixes.json", "r") as f:
-    prefixes = json.load(f) # Load the prefixes
-
-  prefixes[int(guild.id)] = startingprefix # Sets the default prefix to '//'
-
-  with open("prefixes.json", "w") as f:
-    json.dump(prefixes, f) # Dump the json data
-
-
-
-@tasks.loop(seconds=10) # Async task that runs every 10 seconds
-async def autostatus():
-  await asyncio.sleep(10) # Waits 10 seconds to switch statuses
-  await client.change_presence(activity=discord.Activity(name=f'{len(client.users)} Users! | {startingprefix}prefix <your new prefix>', type=discord.ActivityType.listening))
-
-  await asyncio.sleep(10) # Also waits 10 seconds
-  await client.change_presence(activity=discord.Activity(name=f'{len(client.guilds)} Servers! | {startingprefix}help', type=discord.ActivityType.listening))
-  await asyncio.sleep(10) # Again, waits 10 seconds
-  await client.change_presence(activity=discord.Activity(name=f'https://robocollab.xyz | {startingprefix}help', type=discord.ActivityType.playing))
-
-@client.event # Listen for a bot event
-async def on_ready():
-    await gmd.login('RoboCollab', os.getenv('password')) # Logs into GD
-    await client.wait_until_ready() # Wait until the bot has logged in
-    gd.events.enable(client.loop) # Enable the message listener
-    print(f"Logged in as {client.user} ({client.user.id})") # Prints bot tag and ID
-    await client.change_presence(activity=discord.Activity(name=f"{len(client.guilds)} Servers! | {startingprefix}help", type=discord.ActivityType.listening))
-    autostatus.start() # Starts the autostatus
+client.add_cog(CreateCollab(client))
+client.add_cog(Listeners(client, gmd, ENV, startingprefix))
+client.add_cog(Set_Prefix(client))
+client.add_cog(AddPart(client))
+client.add_cog(Invite(client))
+client.add_cog(Delete(client))
+client.add_cog(Join(client))
+client.add_cog(Link(client, gmd))
+client.add_cog(Collabs(client))
 '''
+
 @gmd.listen_for("message", delay=5.0) # Listens for a GD event
 async def on_message(message: gd.message.Message):
-  with open("users.json", "r") as f:
+  with open("private/users.json", "r") as f:
     users = json.load(f) # Load the users json
   for i in users: # Iterates through every key in the json
     if users[i].get('account_id') == message.author.account_id: # Check if the current key has an account ID of the sender
@@ -119,14 +58,14 @@ async def on_message(message: gd.message.Message):
           await message.reply(f'You are already linked! If you would like to unlink, please message "unlink" to this account.') # Reply to the message on GD
           break
         users[i]['linktype'] = 'verified' # Sets the linktype to verified
-        with open("users.json", "w") as f:
+        with open("private/users.json", "w") as f:
           json.dump(users, f) # Dump the json data
         break
       await message.read()
       if str(message.body).lower() == 'unlink':
         await message.reply('Successfully unlinked!') # Reply to the message on GD
         del users[i]
-        with open("users.json", "w") as f:
+        with open("private/users.json", "w") as f:
           json.dump(users, f) # Dump the json data
         break
 '''
@@ -136,46 +75,52 @@ async def on_message(message: gd.message.Message):
 async def info(ctx):
   await normalembed(ctx, 'RoboCollab Info', f'**Language:** `Python {python_version()}`\n**RoboCollab Version:** `V7 {version}`\n**Servers:** `{len(client.guilds)}`\n**Users:** `{len(client.users)}`\n\n**Created by [ZeroIntensity](https://zintensity.net)**\n**RoboCollab\'s [GitHub](https://github.com/ZeroIntensity/RoboCollab)**')
 
-@client.command() # Define a bot command
-async def link(ctx, *, args = None): # Account linking command
-  if not args:
-    await error('Please specify an account')
-    return
-  try:
-    user = await gmd.find_user(args) # Check to see if the user exists
-  except gd.MissingAccess:
-    await error('That account doesn\'t exist')
-    return
-  with open("users.json", "r") as f:
-    users = json.load(f)
-  x = { # Dict that will be added to the json
-    'linktype': 'unverified',
-    'account_id': user.account_id
-  }
-  users[int(ctx.author.id)] = x
 
-  with open("users.json", "w") as f:
-    json.dump(users, f) # Dump the json data
-  
-  await normalembed(ctx, 'Account Link',f'Waiting to link `{args}`. Please message **"verify"** to the account **RoboCollab** on GD.')
-
-
-@client.command(aliases=['prefix']) # Define a bot command
-@commands.has_permissions(manage_guild=True)
-async def setprefix(ctx, *, args=None): # Command that changes the guild prefix
-  if not args:
-    await error(ctx, 'You need to specify a prefix.')
-    return
-  pre = await grab_prefix(ctx)
-  if pre == args: # Checks if its the same as the current prefix
-    await error(ctx, 'That is already set as your prefix')
-    return
-  with open("prefixes.json", "r") as f: # Load the prefixes
-    prefixes = json.load(f)
-    prefixes [str(ctx.guild.id)] = args # Sets the new prefix
-  with open("prefixes.json", "w") as f:
-    json.dump(prefixes, f)
-  await normalembed(ctx, 'Set Prefix', f'Set the prefix to `{args}`')
+@client.command(name="eval") # totally not stolen yes
+async def eval_fn(ctx, *, code):
+          if not str(ctx.author.id) == '736038441384542268':
+            await error(ctx, 'You cannot run this command.')
+            return
+          language_specifiers = ["python", "py", "javascript", "js", "html", "css", "php", "md", "markdown", "go", "golang", "c", "c++", "cpp", "c#", "cs", "csharp", "java", "ruby", "rb", "coffee-script", "coffeescript", "coffee", "bash", "shell", "sh", "json", "http", "pascal", "perl", "rust", "sql", "swift", "vim", "xml", "yaml"]
+          loops = 0
+          while code.startswith("`"):
+              code = "".join(list(code)[1:])
+              loops += 1
+              if loops == 3:
+                  loops = 0
+                  break
+          for language_specifier in language_specifiers:
+              if code.startswith(language_specifier):
+                  code = code.lstrip(language_specifier)
+          while code.endswith("`"):
+              code = "".join(list(code)[0:-1])
+              loops += 1
+              if loops == 3:
+                  break
+          code = "\n".join(f"    {i}" for i in code.splitlines()) #Adds an extra layer of indentation
+          code = f"async def eval_expr():\n{code}" #Wraps the code inside an async function
+          def send(text): #Function for sending message to discord if code has any usage of print function
+              client.loop.create_task(ctx.send(text))
+          env = {
+                "bot": client,
+                "client": client,
+                "ctx": ctx,
+                "print": send,
+                "_author": ctx.author,
+                "_message": ctx.message,
+                "_channel": ctx.channel,
+                "_guild": ctx.guild,
+                "_me": ctx.me
+          }
+          env.update(globals())
+          try:
+                exec(code, env)
+                eval_expr = env["eval_expr"]
+                result = await eval_expr()
+                if result:
+                    await ctx.send(result)
+          except:
+                await ctx.send(f"```py\n{traceback.format_exc()}```")
 
 
 @client.command()
@@ -192,208 +137,6 @@ async def help(ctx, args = None):
     embed.add_field(name="Collab Commands", value=f"``{prefix}help collab``")
     await ctx.send(embed=embed)
 
-@client.command(aliases=['create','cc','create_collab'])
-@commands.has_permissions(administrator=True)
-async def createcollab(ctx, name = None, song = None, difficulty = None):
-  database = jsondb.Client('database/')
-  valid_difficulties = ['auto','easy','normal','hard','harder','insane','easy demon','medium demon','hard demon','insane demon','extreme demon','silent']
-  prefix = await grab_prefix(ctx) # Get the guild prefix
-  if not name: # Check for name argument
-    await error(ctx, 'Please specify a name for the collab.')
-    return
-  if not song: # Check for song argument
-    await error(ctx, 'Please specify a song for the collab.')
-    return
-  if not difficulty: # Check for difficulty argument
-    await error(ctx, 'Please specify a difficulty for the collab.')
-    return
-  if not difficulty in valid_difficulties:
-    await error(ctx, 'That is not a valid difficulty.')
-    return
-  if len(name) > 20:
-    await error(ctx, 'You cannot create a collab name with more than 20 characters.')
-    return
-  for i in name:
-    if i not in string.ascii_letters:
-      try:
-        int(i)
-      except:
-        await error(ctx, 'That is not a valid name.')
-        return
-  difficulty = difficulty.capitalize()
-  try: # Try statement to handle exception if the song is invalid
-    yt = YouTube(song) # Get the song
-    songtitle = yt.title
-  except: # Catch the exception
-    await error(ctx, f'That is not a valid YouTube URL.')
-  try:
-    database.create(f'{ctx.guild.id}{name}') # Check if a collab exists with that name
-  except Exception as err:
-    await error(ctx, 'This server already has a collab with that name.')
-    print(traceback.format_exc())
-  database.connect(f'{ctx.guild.id}{name}') # Connect to the json
 
-  x = { # Dict that will be added to the json
-    'host_discord_id': ctx.author.id,
-    'name': name,
-    'song': {
-      'link': song,
-      'title': songtitle
-    },
-    'difficulty': difficulty
-  }
-  database.dump(f'user_{ctx.author.id}', ctx.author.id)
-  database.dump('main_data', x) # Dump the json data
-  database.connect_clear() # Clear the connection
 
-  await normalembed(ctx, 'Collab Created!', f'The collab `{name}` has been created.\n**Host:** {ctx.author.mention}\n**Song:** `{songtitle}`\n**Difficulty:** `{difficulty}`') # Send the embed
-
-@client.command()
-@commands.has_permissions(administrator=True)
-async def invite(ctx, member: discord.Member = None, args = None): # Handles collab invites
-  if not args: # If a collab isnt specified
-    await error(ctx, 'Please specify a collab.')
-    return
-  if not member: # If a member isnt specified
-    await error(ctx, 'Please specify a member.')
-    return
-
-  database = jsondb.Client('database/') # Load the jsondb client
-  try:
-    database.connect(f'{ctx.guild.id}{args}') # Attempt to connect to the json
-  except:
-    await error(ctx, 'That collab doesn\'t exist.') # If it fails
-    return
-  
-  try:
-    database.load(f'invite_{member.id}') # Load the member invite json
-    await error(ctx, 'That user is already invited to this collab!') # If it exists (meaning it won't fail), it means they are already invited
-    return
-  except: # yeah
-    pass
-  try:
-    database.load(f'user_{member.id}') # Load the user json
-    await error(ctx, 'That user is already in this collab!') # If it exists (meaning it won't fail), it means they have already joined
-    return
-  except: # yeah
-    pass
-
-  pre = await grab_prefix(ctx) # Get the guild prefix
-  database.dump(f'invite_{member.id}', f'You have joined the collab `{args}`!') # Dump the json
-  database.connect_clear() # Clear the connection
-  await normalembed(ctx, 'Member Invited!', f'{member.mention} has been invited to the collab `{args}`! They can use `{pre}join "{args}"` to join it!') # Send the embed
-
-@client.command(aliases=['accept'])
-async def join(ctx, args = None): # Handles collab joins
-  if not args: # If a collab isnt specified
-    await error(ctx, 'Please specify a collab.')
-    return
-  database = jsondb.Client('database/') # Load the jsondb client
-  try:
-    database.connect(f'{ctx.guild.id}{args}') # Try and connect to the db
-  except:
-    await error(ctx, 'That collab doesn\'t exist.') # If it doesn't exist
-    return
-  
-  try:
-    embed = await customembed(ctx, 'Collab Joined!', database.load(f'invite_{ctx.author.id}')) # Get an embed variable
-    host = client.get_user(int(database.load('main_data').get('host_discord_id'))) # Get the host as a member object by loading their id from the main_data json key
-    await ctx.send(f'Hey {host.mention}, {ctx.author.mention} has joined your collab!', embed=embed) # Send the message and embed
-  except:
-    await error(ctx, 'You don\'t have an invite to this collab!') # If they don't have an invite
-    return
-  database.delete(f'invite_{ctx.author.id}') # Remove the invite
-  database.dump(f'users_{ctx.author.id}', ctx.author.id) # Add them to the users
-  database.connect_clear() # Clear the connection
-  
-  
-
-@client.command(aliases=['remove'])
-@commands.has_permissions(administrator=True)
-async def delete(ctx, args = None): # Handles collab deletions
-  database = jsondb.Client('database/') # Load the jsondb client
-  if not args: # If a collab isn't specified
-    await error(ctx, 'Please specify a collab to remove.')
-    return
-  try:
-    database.remove(f'{ctx.guild.id}{args}') # Try and remove the json file
-  except:
-    await error(ctx, 'That collab doesn\'t exist.') # If it fails
-    return
-  await normalembed(ctx, 'Collab Removed!', f'The collab `{args}` has been removed.') # Send the embeds
-
-@client.command(aliases=['add_part'])
-@commands.has_permissions(administrator=True)
-async def addpart(ctx, member: discord.Member = None, args = None, start = None, end = None, deadline = None):
-  database = jsondb.Client('database/') # Load the jsondb client
-  if not args: # If a collab isn't specified
-    await error(ctx, 'Please specify a collab.')
-    return
-  if not member: # If a member isn't specified
-    await error(ctx, 'Please specify a member.')
-    return
-  if not deadline: # If a deadline isn't specified
-    await error(ctx, 'Please specify a deadline.')
-    return
-  if not start: # If a start offset isn't specified
-    await error(ctx, 'Please specify a start offset.')
-    return
-  if not end: # If a end offset isn't specified
-    await error(ctx, 'Please specify a end offset.')
-    return
-  try: # Check for a valid deadline
-    day,month,year = deadline.split('/') # Split it at a /
-    int(day) # Check if they are ints
-    int(month)
-    int(year)
-  except: # Catch the exception
-    await error(ctx, 'That is not a valid deadline')
-    return
-  deadline = day.join('/') + month.join('/') + year.join('/') # Rebuild the deadline variable
-  try: # Check for valid offsets
-    int(start)
-    int(end)
-    if start > end:
-      0/0 # Cause an error
-  except: # Catch the exception
-    await error(ctx, 'That is not a valid start/end offset.')
-    return
-
-  try:
-    database.connect(f'{ctx.guild.id}{args}') # Try and connect to the db
-  except:
-    await error(ctx, 'That collab doesn\'t exist.') # If it doesn't exist
-    return
-  try:
-    database.load(f'user_{member.id}') # Load the member json
-    return
-  except: # yeah
-    await error(ctx, 'That user is not in this collab.')
-  
-  x = { # Json that will be put in the database
-    'id': member.id, # Member id
-    'start': start, # Start offset
-    'end': end, # End offset
-    'deadline': deadline # Deadline
-  }
-  database.dump(f'part_{member.id}', x) # Dump the json
-  database.connect_clear() # Clear the connection
-  embed = await customembed(ctx, 'Part Added!', f'Added a part for {member.mention} from `{start} - {end}`\n**Deadline:** `{deadline}`') # Get the embed
-  await ctx.send(member.mention + ", a part was added for you!", embed=embed) # Send the message
-
-@client.command()
-async def eval(ctx, *, args):
-  if not str(ctx.author.id) == '736038441384542268':
-    await error(ctx, 'You cannot run this command.')
-    return
-  run = args.split('```')
-
-  try:
-    async def _eval(ctx):
-      exec(run[1])
-    
-    asyncio.run(_eval(ctx))
-  except Exception as err:
-    await error(ctx, f'```py\n{traceback.format_exc()}```')
-
-client.run(os.getenv('token')) # Run the bot using token from .env file
+client.run(ENV.token) # Run the bot using token from .env file
