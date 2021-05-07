@@ -10,3 +10,4 @@ from .collab.collabs import Collabs
 from .main.help import Help
 from .hidden.eval import Eval
 from .hidden.json import Json
+from .main.info import Info

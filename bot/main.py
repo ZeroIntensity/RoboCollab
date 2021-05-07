@@ -44,11 +44,13 @@ client.add_cog(Link(client, gmd)) # Adds link command
 client.add_cog(Collabs(client)) # Adds collabs command
 client.add_cog(Help(client)) # Adds help command
 client.add_cog(Eval(client)) # Adds eval command
-client.add_cog(Json(client)) # Adds eval command
+client.add_cog(Json(client)) # Adds JSON command
+client.add_cog(Info(client, version)) # Adds Info command
+
 
 @gmd.listen_for("message", delay=5.0) # Listens for a GD event
 async def on_message(message: gd.message.Message):
-  with open("private/users.json", "r") as f:
+  with open(f"{get_private_folder()}users.json", "r") as f:
     users = json.load(f) # Load the users json
   for i in users: # Iterates through every key in the json
     if users[i].get('account_id') == message.author.account_id: # Check if the current key has an account ID of the sender
@@ -60,31 +62,16 @@ async def on_message(message: gd.message.Message):
           await message.reply(f'You are already linked! If you would like to unlink, please message "unlink" to this account.') # Reply to the message on GD
           break
         users[i]['linktype'] = 'verified' # Sets the linktype to verified
-        with open("private/users.json", "w") as f:
+        with open(f"{get_private_folder()}users.json", "w") as f:
           json.dump(users, f) # Dump the json data
         break
       await message.read()
       if str(message.body).lower() == 'unlink':
         await message.reply('Successfully unlinked!') # Reply to the message on GD
         del users[i]
-        with open("private/users.json", "w") as f:
+        with open(f"{get_private_folder()}users.json", "w") as f:
           json.dump(users, f) # Dump the json data
         break
 
     
-
-@client.command()
-async def info(ctx):
-  await normalembed(ctx, 'RoboCollab Info', f'''**Language:** `Python {python_version()}`
-**RoboCollab Version:** `V7 {version}`
-**Servers:** `{len(client.guilds)}`
-**Users:** `{len(client.users)}`
- 
-**Created by [ZeroIntensity](https://zintensity.net)**
-**RoboCollab's [GitHub](https://github.com/ZeroIntensity/RoboCollab)**''')
-
-
-
-
-
 client.run(ENV.token) # Run the bot using token from env class

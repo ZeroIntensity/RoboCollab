@@ -14,12 +14,12 @@ class Listeners(commands.Cog):
     @commands.Cog.listener() # Listen for a bot event
     async def on_guild_join(self, guild): # Do when the bot joins a guild
         startingprefix = self.startingprefix
-        with open("private/prefixes.json", "r") as f:
+        with open(f"{get_private_folder()}prefixes.json", "r") as f:
             prefixes = json.load(f) # Load the prefixes
 
         prefixes[int(guild.id)] = startingprefix # Sets the default prefix to '//'
 
-        with open("private/prefixes.json", "w") as f:
+        with open(f"{get_private_folder()}prefixes.json", "w") as f:
             json.dump(prefixes, f) # Dump the json data
 
 

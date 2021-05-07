@@ -2,7 +2,8 @@ from discord.ext import commands # Import commands
 from utils import *
 import jsondb
 import string
-from pytube import YouTube
+import requests
+from bs4 import BeautifulSoup
 import traceback
 class CreateCollab(commands.Cog): # Create the cog subclass
     def __init__(self, bot, jsondb): # For passing in the client
@@ -38,11 +39,16 @@ class CreateCollab(commands.Cog): # Create the cog subclass
                   return
         difficulty = difficulty.capitalize()
         try: # Try statement to handle exception if the song is invalid
-            yt = YouTube(song) # Get the song
-            songtitle = yt.title
-        except: # Catch the exception
-            print(traceback.format_exc())
-            await error(ctx, f'That is not a valid YouTube URL.')
+            if (not song.startswith('https://youtube.com')) and (not song.startswith('https://www.youtube.com')) and (not song.startswith('https://youtu.be')):
+                0/0 # Cause an exception
+            resp = requests.get(song)
+            soup = BeautifulSoup(resp.text, 'html.parser')
+            for titl in soup.find_all('title'):
+                title = titl.get_text()
+            
+            title = title[:-10]
+        except Exception as err: # Catch the exception
+            await error(ctx, f'That is not a valid YouTube URL. {err}')
             return
         try:
             database.create(f'{ctx.guild.id}{name}') # Check if a collab exists with that name
@@ -55,8 +61,8 @@ class CreateCollab(commands.Cog): # Create the cog subclass
             'host_discord_id': ctx.author.id,
             'name': name,
             'song': {
-            'link': song,
-            'title': songtitle
+                'link': song,
+                'title': title
             },
             'difficulty': difficulty
         }
@@ -64,4 +70,4 @@ class CreateCollab(commands.Cog): # Create the cog subclass
         database.dump('main_data', x) # Dump the json data
         database.connect_clear() # Clear the connection
 
-        await normalembed(ctx, 'Collab Created!', f'The collab `{name}` has been created.\n**Host:** {ctx.author.mention}\n**Song:** `{songtitle}`\n**Difficulty:** `{difficulty}`') # Send the embed
+        await normalembed(ctx, 'Collab Created!', f'The collab `{name}` has been created.\n**Host:** {ctx.author.mention}\n**Song:** `{title}`\n**Difficulty:** `{difficulty}`') # Send the embed
