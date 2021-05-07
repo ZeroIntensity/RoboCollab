@@ -34,7 +34,7 @@ Special thanks to [nekitdev](https://github.com/nekitdev) for helping me with [g
 - [bs4](https://pypi.org/project/bs4/)
 - [python-dotenv](https://pypi.org/project/python-dotenv/)
 - [flask-discord](https://pypi.org/project/flask-discord/)
-- [gevent](https://pypi.org/project/python-gevent/)
+- [gevent](https://pypi.org/project/gevent/)
 
 ## Installation
 
