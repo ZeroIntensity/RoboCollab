@@ -2,15 +2,15 @@ from discord.ext import commands # Import commands
 from utils import *
 import jsondb
 class Join(commands.Cog): # Create the cog subclass
-    def __init__(self, bot): # For passing in the client
+    def __init__(self, bot, jsondb): # For passing in the client
         self.client = bot # Set the client to the client
-
+        self.jsondb = jsondb
     @commands.command(aliases=['accept'])
     async def join(self, ctx, args = None): # Handles collab joins
         if not args: # If a collab isnt specified
             await error(ctx, 'Please specify a collab.')
             return
-        database = jsondb.Client('private/database/') # Load the jsondb client
+        database = self.jsondb.Client(f'{get_private_folder()}database/') # Load the jsondb client
         try:
             database.connect(f'{ctx.guild.id}{args}') # Try and connect to the db
         except:

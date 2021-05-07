@@ -11,8 +11,7 @@ class Collabs(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def collabs(self, ctx, args = None): # Handles collab deletions
         collabs = []
-        for file in os.listdir("private/database"):
-            print(file)
+        for file in os.listdir(f"{get_private_folder()}database"):
             if file.startswith(str(ctx.guild.id)):
                 f = file.replace(str(ctx.guild.id), '')
                 f = f.replace('.json', '')

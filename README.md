@@ -18,4 +18,4 @@ Special thanks to [nekitdev](https://github.com/nekitdev) for helping me with [g
 
 ## Notes
 ### Known Bugs
-This is pretty untested so it will be pretty buggy.
+Account linking can cause GD IP ban.

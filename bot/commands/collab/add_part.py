@@ -2,13 +2,13 @@ from discord.ext import commands # Import commands
 from utils import *
 import jsondb
 class AddPart(commands.Cog): # Create the cog subclass
-    def __init__(self, bot): # For passing in the client
+    def __init__(self, bot, jsondb): # For passing in the client
         self.client = bot # Set the client to the client
-
+        self.jsondb = jsondb
     @commands.command(aliases=['add_part'])
     @commands.has_permissions(administrator=True)
-    async def addpart(ctx, member: discord.Member = None, args = None, start = None, end = None, deadline = None):
-        database = jsondb.Client('private/database/') # Load the jsondb client
+    async def addpart(self, ctx, member: discord.Member = None, args = None, start = None, end = None, deadline = None):
+        database = self.jsondb.Client(f'{get_private_folder()}database/') # Load the jsondb client
         try: # Check for a valid deadline
             day,month,year = deadline.split('/') # Split it at a /
             int(day) # Check if they are ints

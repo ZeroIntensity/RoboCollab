@@ -1,17 +1,16 @@
 from discord.ext import commands # Import commands
 from utils import *
-import jsondb
 
 class Invite(commands.Cog):
-    def __init__(self, bot): # For passing in the client
+    def __init__(self, bot, jsondb): # For passing in the client
         self.client = bot # Set the client to the client
-    
+        self.jsondb = jsondb
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def invite(self, ctx, member: discord.Member = None, args = None): # Handles collab invites
 
 
-        database = jsondb.Client('private/database/') # Load the jsondb client
+        database = self.jsondb.Client(f'{get_private_folder()}database/') # Load the jsondb client
         try:
             database.connect(f'{ctx.guild.id}{args}') # Attempt to connect to the json
         except:

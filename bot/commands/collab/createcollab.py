@@ -5,13 +5,13 @@ import string
 from pytube import YouTube
 import traceback
 class CreateCollab(commands.Cog): # Create the cog subclass
-    def __init__(self, bot): # For passing in the client
+    def __init__(self, bot, jsondb): # For passing in the client
         self.client = bot # Set the client to the client
-    
+        self.jsondb = jsondb
     @commands.command(aliases=['create','cc','create_collab'])
     @commands.has_permissions(administrator=True)
     async def createcollab(self, ctx, name = None, song = None, difficulty = None):
-        database = jsondb.Client('private/database/')
+        database = self.jsondb.Client(f'{get_private_folder()}database/')
         valid_difficulties = ['auto','easy','normal','hard','harder','insane','easy demon','medium demon','hard demon','insane demon','extreme demon','silent'] # All the valid difficulties
         prefix = await grab_prefix(ctx) # Get the guild prefix
         if not name: # Check for name argument
