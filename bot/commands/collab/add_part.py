@@ -9,7 +9,7 @@ class AddPart(commands.Cog): # Create the cog subclass
     @commands.command(aliases=['add_part'])
     @commands.has_permissions(administrator=True)
     async def addpart(self, ctx, collab = None, member: discord.Member = None, start = None, end = None, deadline = None):
-        database = self.jsondb.Client(f'{get_private_folder()}database/') # Load the jsondb client
+        database = self.jsondb.Client(f'{get_private_folder()}database\\') # Load the jsondb client
         
         if not member:
             await error(ctx, 'Please specify a member.')
@@ -49,7 +49,7 @@ class AddPart(commands.Cog): # Create the cog subclass
             return
 
         try:
-            database.connect(f'{ctx.guild.id}{collab}') # Try and connect to the db
+            jsn = await database.connect(f'{ctx.guild.id}{collab}', create = False) # Try and connect to the db
         except:
             await error(ctx, 'That collab doesn\'t exist.') # If it doesn't exist
             return
@@ -65,7 +65,7 @@ class AddPart(commands.Cog): # Create the cog subclass
                 except:
                     pass
         try:
-            database.load(f'user_{member.id}') # Load the member json
+            await jsn[f'user_{member.id}'] # Load the member json
         except: # yeah
             await error(ctx, 'That user is not in this collab.')
         
@@ -85,7 +85,6 @@ class AddPart(commands.Cog): # Create the cog subclass
         else:
             partamount = max(parts)
             partamount += 1
-        database.dump(f'part_{member.id}_{partamount}', x) # Dump the json
-        database.connect_clear() # Clear the connection
+        await jsn.dump(f'part_{member.id}_{partamount}', x) # Dump the json
         embed = await customembed(ctx, 'Part Added!', f'Added a part for {member.mention} from `{start} - {end}`\n**Deadline:** `{deadline}`') # Get the embed
         await ctx.send(member.mention + ", a part was added for you!", embed=embed) # Send the message//json 

@@ -8,11 +8,11 @@ ENV = env()
 
 app = Flask(__name__) # Initalize the flask client
 
-app.secret_key = b""
+app.secret_key = b"f-difg8idsf08gudsf7ugndf7ndsf7"
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "true"      # !! Only in development environment.
 app.config["DISCORD_CLIENT_ID"] = 754902431258771567   # Discord client ID.
 app.config["DISCORD_CLIENT_SECRET"] = ENV.secret                # Discord client secret.
-app.config["DISCORD_REDIRECT_URI"] = "https://robocollab.xyz"                 # URL to your callback endpoint.
+app.config["DISCORD_REDIRECT_URI"] = "http://localhost:5000/callback"                 # URL to your callback endpoint.
 app.config["DISCORD_BOT_TOKEN"] = ENV.token                    # Required to access BOT resources.
 
 discord = DiscordOAuth2Session(app) # Initalize the flask-discord oauth session

@@ -10,7 +10,7 @@ import dotenv # Needed to load the .env file
 import json # Used for JSON
 import asyncio # Import asyncio ~ Needed for autostatus
 from pytube import YouTube # For handling youtube links. would use bs4 but this is easier lmao
-import jsondb # Thing I made for better handling json
+import jsondb as j # Thing I made for better handling json
 import traceback # For error handling
 import string # For getting alphabet
 from platform import python_version # For python version
@@ -25,7 +25,7 @@ startingprefix = '//' # Default prefix for when the bot joins a guild
 intents = discord.Intents.default() # Gets intents
 intents.members = True # Turns on members intent
 intents.guilds = True # Turns on guilds intent
-
+jsondb = j.Client()
 client = commands.Bot(command_prefix = get_prefix, intents = intents) # Initializes the bot client
 
 gmd = gd.Client() # Initializes the gd client
@@ -44,7 +44,7 @@ client.add_cog(Link(client, gmd)) # Adds link command
 client.add_cog(Collabs(client)) # Adds collabs command
 client.add_cog(Help(client)) # Adds help command
 client.add_cog(Eval(client)) # Adds eval command
-client.add_cog(Json(client)) # Adds JSON command
+client.add_cog(Json(client, jsondb)) # Adds JSON command
 client.add_cog(Info(client, version)) # Adds Info command
 
 

@@ -8,16 +8,7 @@
 
 **Python Version:** `3.8.9`
 
-- Brought back account linking with a ratelimit.
-- YouTube links are now handled via [bs4](https://pypi.org/project/bs4/) and [requests](https://pypi.org/project/requests/) due to [pytube3](https://pypi.org/project/pytube3/) being buggy.
-- Moved the `info` command to cogs.
-- Bugfixed some commands.
-- Changed the way the `add_part` command handles JSON to allow a user to have multiple parts in the same collab.
-- Added `install.py`
-- Added a `get_private_folder` function in the `utils` that would give a direct path to the hidden `private` folder.
-- Upgraded `README.md`
-- Created a new directory called `hidden` in the `commands` folder. This is where developer commands are now stored.
-- Started development of `partlist` command.
+- Added some things
 ## Credits
 
 ### Developers
@@ -61,9 +52,10 @@ secret=bot secret here
 - Fix error "`Invalid OAuth2 redirect_uri`" when logging in on the web server. 
 
 ### Known Bugs
-- Account linking can cause GD IP ban (Not sure if fixed, nothing I can do about  this atm.).
+- Account linking can cause GD IP ban (Not sure if fixed, nothing I can do about this atm.).
 - Web server will start, but all the features pretty much wont work.
 - `addpart` command will allow part overwriting.
+- JsonDB is buggy.
 ### Other
 - `partlist` command is not an actual command on the bot yet as it is unfinished.
 - `help` command is outdated and a lot of it does not work.

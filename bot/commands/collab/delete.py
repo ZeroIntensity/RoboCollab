@@ -8,12 +8,12 @@ class Delete(commands.Cog):
     @commands.command(aliases=['remove'])
     @commands.has_permissions(administrator=True)
     async def delete(self, ctx, args = None): # Handles collab deletions
-        database = self.jsondb.Client(f'{get_private_folder()}database/') # Load the jsondb client
+        database = await self.jsondb.database(f'{get_private_folder()}database\\') # Load the database
         if not args: # If a collab isn't specified
             await error(ctx, 'Please specify a collab to remove.')
             return
         try:
-            database.remove(f'{ctx.guild.id}{args}') # Try and remove the json file
+            await database.remove(f'{ctx.guild.id}{args}.json', create = False) # Try and remove the json file
         except:
             await error(ctx, 'That collab doesn\'t exist.') # If it fails
             return
