@@ -3,3 +3,8 @@ from .get_prefix import get_prefix
 from .sql import SQL
 from .resolve_top import resolve_top
 from .check_rc_perms import check_rc_perms
+from .embed import embed
+from .color import color
+from .build_args_help import build_args_help
+from .print_traceback import print_traceback
+from .reload_cogs import reload_cogs
