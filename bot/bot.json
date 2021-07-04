@@ -1,0 +1,13 @@
+{
+    "version": "1.0.0",
+    "starting_prefix": "//",
+    "beta": "true",
+    "bot_state": "V8",
+    "rc_perms": ["user","moderator","developer"],
+    "perms": {
+        "ZeroIntensity": {
+            "discord_id": "736038441384542268",
+            "state": "developer"
+        }
+    }
+}
