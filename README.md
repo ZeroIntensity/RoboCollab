@@ -1,6 +1,9 @@
 
 Developed by [ZeroIntensity](https://github.com/ZeroIntensity), under the MIT License.
 
+**Dependencies**
+- [discord.py](https://pypi.org/project/discord.py)
+- [flask](https://pypi.org/project/flask)
 
 # RoboCollab SQL
 

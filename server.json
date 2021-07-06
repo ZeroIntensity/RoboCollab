@@ -1,0 +1,8 @@
+{
+    "ip": "127.0.0.1",
+    "port": 8080,
+    "static_path": "./web/static/",
+    "html_path": "./web/html/",
+    "js_path": "./web/js",
+    "css_path": "./web/css"
+}

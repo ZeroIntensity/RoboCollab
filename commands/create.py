@@ -1,5 +1,4 @@
 from discord.ext import commands
-import discord
 from utils import *
 import string
 import os
@@ -42,8 +41,7 @@ class Create(commands.Cog): # Cog for create command
         load["guild"] = ctx.guild.id # Set the guild to the guild id
         load["parts"] = {} # Create an empty parts dict
         load["deadlines"] = {} # Create an empty deadlines dict
-        load["invited"] = [] # Create an empty invited list
-        load["joined"] = [] # Create an empty joined list
+        load["users"] = {} # Create an empty users dict
         load["roles"] = ["layout", "decoration", "playtester", "merger", "verifier", "host"] # List representing all roles
 
 
@@ -56,13 +54,12 @@ class Create(commands.Cog): # Cog for create command
             "collab_name": name
         } # Dict to process SQL variables
 
-        print(sql)
 
         SQL('add_to_table.sql', sql)
         await success(ctx, f'**Success!** `{name}` has been created!') # Send success embed
 
     @createcollab.error
-    async def createcollab_err(self, ctx, error):
+    async def err(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument): # If an argument is missing
             d = {
                 "name": "req",

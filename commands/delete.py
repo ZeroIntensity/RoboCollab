@@ -1,9 +1,6 @@
 from discord.ext import commands
-import discord
 from utils import *
-import string
 import os
-import json
 
 class Delete(commands.Cog): # Cog for delete command
     def __init__(self, client):
@@ -19,15 +16,8 @@ class Delete(commands.Cog): # Cog for delete command
         if not check_collab_exists(ctx.guild.id, name):
             return await error(ctx, f'`{name}` does not exist.')
 
-        sql = {
-            "dc_id": ctx.guild.id,
-            "collab_name": name
-        }
-
-        resp = SQL('get_rcid.sql', sql)
-        rcid = resp[0][0]
-        resp = SQL('get_collab_by_rcid.sql', {"rc_id": rcid})
-        collab = resp[0]
+        rcid = get_rcid(ctx, name)
+        collab = get_collab_sql(rcid)
 
         SQL('delete_entry.sql', {"rc_id": rcid})
         os.remove(collab[2])
@@ -35,7 +25,7 @@ class Delete(commands.Cog): # Cog for delete command
         await success(ctx, f'**Success!** `{name}` has been deleted!') # Send success embed
 
     @deletecollab.error
-    async def createcollab_err(self, ctx, error):
+    async def err(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument): # If an argument is missing
             d = {
                 "name": "req"
