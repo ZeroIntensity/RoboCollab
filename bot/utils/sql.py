@@ -13,7 +13,11 @@ def SQL(file, vals = None): # Function for running SQL queries
         lines = f.read() # Read the SQL file
     if vals:
         for i in vals:
-            lines = lines.replace("{" + i + "}", vals[i]) # Insert vals
+            
+            insert = vals[i]
+            if isinstance(insert, str):
+                insert = f"'{insert}'"
+            lines = lines.replace("{" + i + "}", str(insert)) # Insert vals
 
     for line in lines.split(';'): # Iterate through each command
         if line == "":

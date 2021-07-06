@@ -1,4 +1,4 @@
-# RoboCollab SQL
+# SQL
 
 ## Usage
 ### Parameters
@@ -13,8 +13,11 @@
 |---|---|---|
 |`init.sql`|Initalize database if it **does not exist**.|Ran in `main.py` on every instance.|
 |`get_all_data.sql`|Get all data from database.||
-|`get_collabs_by_dc_id.sql`|Get all columns with a certain Discord Guild ID|Must be run from the `SQL()` function inside RoboCollab utils to pass in arguments correctly.|
-|`add_to_table.sql`|Insert values into a column.|Also must to run from the `SQL()` function.|
+|`get_collabs_by_dc_id.sql`|Get all columns with a certain Discord Guild ID|Must be run from the `SQL()` function.|
+|`add_to_table.sql`|Insert values into a column.|Must be run from the `SQL()` function.|
+|`delete_entry.sql`|Deletes a entry from the database via the `rc_id`.|Must be run from the `SQL()` function.|
+|`get_rcid.sql`|Get an `rc_id` based off the collab name and guild id.|Must be run from the `SQL()` function.|
+|`get_collab_by_rcid.sql`|Get collab data based off the `rc_id`|Must be run from the `SQL()` function.|
 ## Running SQL Files
 ### What is the `SQL()` function
 All RoboCollab SQL files are ran via the `SQL()` function.
@@ -45,7 +48,7 @@ SELECT * FROM collab_data WHERE dc_id = {variable_1};
 ```sql
 SELECT * FROM collab_data WHERE dc_id = 736038441384542268;
 ```
-**Warning:** If you want to pass in a string, instead of doing `"variable_1": "736038441384542268"`, you need to do `"variable_1": "'736038441384542268'"`
+
 
 ## Notes
 - SQL Injection **is not** an issue.

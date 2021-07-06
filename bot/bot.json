@@ -4,6 +4,7 @@
     "beta": "true",
     "bot_state": "V8",
     "rc_perms": ["user","moderator","developer"],
+    "valid_difficulties": ["auto","easy","normal","hard","harder","insane","easy demon","medium demon","hard demon","insane demon", "extreme demon"],
     "perms": {
         "ZeroIntensity": {
             "discord_id": "736038441384542268",

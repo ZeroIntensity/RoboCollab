@@ -31,6 +31,7 @@ from utils import *
 from pathlib import Path
 import os
 import traceback
+import string
 
 ENV = env.env() # Environment
 
@@ -41,7 +42,6 @@ intents.guilds = True # Turns on guilds intent
 
 
 SQL('init.sql') # Initializes database, will not run if already initialized
-
 
 
 with open('bot.json') as f:
