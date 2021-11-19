@@ -1,0 +1,18 @@
+{
+	"production": false,
+	"prod": {
+		"mongo_url": "idk bruh",
+		"graphiql": false,
+		"ip": "0.0.0.0",
+		"port": 8080,
+		"require_auth": true
+	},
+	"dev": {
+		"mongo_url": "mongodb://localhost:27017/",
+		"graphiql": true,
+		"ip": "localhost",
+		"port": 5000,
+		"require_auth": false
+	},
+	"routers_dir": "./routers"
+}

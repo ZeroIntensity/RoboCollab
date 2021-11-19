@@ -1,1 +1,0 @@
-SELECT * FROM collab_data WHERE rc_id = {rc_id};

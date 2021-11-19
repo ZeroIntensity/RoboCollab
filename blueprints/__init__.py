@@ -1,1 +1,0 @@
-from .basic_pages import basic_pages
