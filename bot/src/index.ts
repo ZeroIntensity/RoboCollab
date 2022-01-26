@@ -1,7 +1,7 @@
 import { Client, Intents } from "discord.js";
 import dotenv from "dotenv";
-import loadCommands from "./load_commands";
-import deployCommands from "./deploy_commands";
+import loadCommands from "./loadCommands";
+import deployCommands from "./deployCommands";
 import { BotId } from "./constants";
 
 dotenv.config();
